@@ -3,6 +3,9 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
+DEPOSIT_TRANSACTION = 1
+TRANSFER_TRANSACTION = 2
+
 app = Flask(__name__)
 CORS(app)
 api = Api(app)

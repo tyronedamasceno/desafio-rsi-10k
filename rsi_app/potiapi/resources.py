@@ -1,6 +1,7 @@
 from flask import jsonify
 from flask_restful import Resource
 
+from rsi_app import DEPOSIT_TRANSACTION, TRANSFER_TRANSACTION
 from rsi_app.potiapi.models import User as UserModel, Account as AccountModel
 from rsi_app.potiapi.request_parsers import (
     account_registration_parser, user_registration_parser,
@@ -137,5 +138,5 @@ class AccountDeposit(Resource):
             return {'message': 'Invalid deposit value'}, 400
 
         account.update_balance(data['valor'])
-        # create_transaction(conta, valor, now)
+        # create_transaction(DEPOSIT_TRANSACTION, conta, valor, now)
         return {'message': 'Deposit successfully'}

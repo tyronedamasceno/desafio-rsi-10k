@@ -116,6 +116,11 @@ class Account(db.Model):
         db.ForeignKey('user.cpf'),
         nullable=False
     )
+    extracts = db.relationship(
+        'Extract',
+        backref='account',
+        lazy=True
+    )
 
     def save_to_db(self):
         db.session.add(self)
@@ -138,3 +143,26 @@ class Account(db.Model):
     @classmethod
     def find_by_id(cls, id):
         return cls.query.filter_by(id=id).first()
+
+
+class Extract(db.Model):
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+    date = db.Column(
+        db.Date,
+        default=datetime.utcnow
+    )
+    value = db.Column(
+        db.Float,
+        nullable=False
+    )
+    description = db.Column(
+        db.String(255)
+    )
+    account = db.Column(
+        db.Integer,
+        db.ForeignKey('account.id'),
+        nullable=False
+    )
