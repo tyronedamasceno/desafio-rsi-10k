@@ -11,17 +11,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'some-secret-string'
 db = SQLAlchemy(app)
 
-from rsi_app.core import models
-from rsi_app.core import routes
 from rsi_app.core import resources
-app.register_blueprint(routes.core)
 
 db.create_all()
 
+api.add_resource(resources.HomeResource, '/')
+api.add_resource(resources.UserRegistration, '/usuario')
 api.add_resource(resources.User, '/usuario/<string:cpf>')
 api.add_resource(resources.UserLogin, '/usuario/login')
 api.add_resource(resources.UserLogout, '/usuario/logout')
 api.add_resource(resources.Transfer, '/transferir')
+api.add_resource(resources.AccountRegistration, '/conta')
 api.add_resource(resources.Account, '/conta/<int:id>')
 api.add_resource(resources.AccountDeposit, '/conta/adicionarSaldo')
 api.add_resource(resources.Extract, '/extrato/<int:id_conta>')
