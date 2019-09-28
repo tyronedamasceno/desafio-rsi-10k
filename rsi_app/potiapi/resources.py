@@ -8,7 +8,8 @@ from rsi_app.potiapi.models import (
 )
 from rsi_app.potiapi.request_parsers import (
     account_registration_parser, user_registration_parser,
-    account_deposit_parser, extract_insertion_parser, transfer_parser
+    account_deposit_parser, extract_insertion_parser, transfer_parser,
+    login_parser
 )
 from rsi_app.potiapi.utils import create_transaction    
 
@@ -78,7 +79,14 @@ class User(Resource):
 
 class UserLogin(Resource):
     def post(self):
-        return {}
+        data = login_parser.parse_args()
+        user = UserModel.find_by_cpf(data['cpf'])
+        if not user:
+            return {'message': 'Dont exists an user with this CPF'}, 404
+        if not UserModel.verify_hash(data['password'], user.password):
+            return {'message': 'Wrong credentials'}, 403
+        # Log user...
+        return {'message': 'User successfully logged'}, 200
 
 
 class UserLogout(Resource):
