@@ -3,9 +3,6 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-DEPOSIT_TRANSACTION = 1
-TRANSFER_TRANSACTION = 2
-
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
@@ -16,7 +13,7 @@ db = SQLAlchemy(app)
 
 from rsi_app.potiapi import resources
 
-db.drop_all()
+# db.drop_all()
 db.create_all()
 
 api.add_resource(resources.HomeResource, '/')

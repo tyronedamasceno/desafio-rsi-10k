@@ -116,11 +116,6 @@ class Account(db.Model):
         db.ForeignKey('user.cpf'),
         nullable=False
     )
-    extracts = db.relationship(
-        'Extract',
-        backref='account',
-        lazy=True
-    )
 
     def save_to_db(self):
         db.session.add(self)
@@ -163,6 +158,17 @@ class Extract(db.Model):
     )
     account = db.Column(
         db.Integer,
-        db.ForeignKey('account.id'),
         nullable=False
     )
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def to_dict(self):
+        return dict(
+            conta=self.account,
+            data=self.date.isoformat(),
+            descricao=self.description,
+            valor=self.value
+        )

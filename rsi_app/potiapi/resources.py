@@ -1,12 +1,16 @@
+from datetime import datetime
+
 from flask import jsonify
 from flask_restful import Resource
 
-from rsi_app import DEPOSIT_TRANSACTION, TRANSFER_TRANSACTION
-from rsi_app.potiapi.models import User as UserModel, Account as AccountModel
+from rsi_app.potiapi.models import (
+    User as UserModel, Account as AccountModel, Extract as ExtractModel
+)
 from rsi_app.potiapi.request_parsers import (
     account_registration_parser, user_registration_parser,
     account_deposit_parser
 )
+from rsi_app.potiapi.utils import create_transaction    
 
 DOC_URL = 'github.com/tyronedamasceno/desafio-rsi-10k/blob/master/docs.md'
 
@@ -81,11 +85,16 @@ class Transfer(Resource):
 
 
 class Extract(Resource):
-    def post(self):
-        return {'tamo': 'aqui'}
-    
     def get(self, id_conta):
-        return {'isso': 'foi um get'}
+        account = AccountModel.find_by_id(id_conta)
+        if not account:
+            return {'message': 'Dont exists an account with this ID'}, 404
+        extracts = ExtractModel.query.filter_by(account=id_conta)
+        return {
+            'Extratos': [
+                extract.to_dict() for extract in extracts
+            ]
+        }
 
     def delete(self, id_conta):
         return {'naaaao': 'pq me deletas?'}     
@@ -138,5 +147,5 @@ class AccountDeposit(Resource):
             return {'message': 'Invalid deposit value'}, 400
 
         account.update_balance(data['valor'])
-        # create_transaction(DEPOSIT_TRANSACTION, conta, valor, now)
+        create_transaction(datetime.utcnow(), data['conta'], data['valor'])
         return {'message': 'Deposit successfully'}
