@@ -11,7 +11,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'some-secret-string'
 db = SQLAlchemy(app)
 
-from rsi_app.core import resources
+from rsi_app.potiapi import resources
 
 db.create_all()
 
