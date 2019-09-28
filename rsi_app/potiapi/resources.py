@@ -8,7 +8,7 @@ from rsi_app.potiapi.models import (
 )
 from rsi_app.potiapi.request_parsers import (
     account_registration_parser, user_registration_parser,
-    account_deposit_parser, extract_insertion_parser
+    account_deposit_parser, extract_insertion_parser, transfer_parser
 )
 from rsi_app.potiapi.utils import create_transaction    
 
@@ -81,8 +81,37 @@ class UserLogout(Resource):
 
 class Transfer(Resource):
     def post(self):
-        return {'vai': 'transferindooo'}
+        data = transfer_parser.parse_args()
+        origin_account = AccountModel.find_by_id(data['contaOrigem'])
+        destiny_account = AccountModel.find_by_id(data['contaDestino'])
+        if not origin_account:
+            return {
+                'message': 'Dont exists an account with the "contaOrigem ID"'
+            }, 404
+        if not origin_account:
+            return {
+                'message': 'Dont exists an account with the "contaDestino ID"'
+            }, 404
+        
+        if isinstance(data['valor'], (str, bytes)):
+            try:
+                data['valor'] = float(data['valor'].replace(',', '.'))
+            except ValueError:
+                return {'message': 'Invalid deposit value'}, 400
+        
+        origin_account.update_balance(-data['valor'])
+        destiny_account.update_balance(data['valor'])
+        create_transaction(
+            date=datetime.now(), account=data['contaOrigem'],
+            value=-data['valor']
+        )
+        create_transaction(
+            date=datetime.now(), account=data['contaDestino'],
+            value=data['valor']
+        )
 
+        return {'message': 'Successfully transfer'}
+        
 
 class Extract(Resource):
     def get(self, id_conta):
