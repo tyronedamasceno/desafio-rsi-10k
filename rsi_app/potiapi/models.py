@@ -34,9 +34,8 @@ class User(db.Model):
         nullable=False
     )
     birth_date = db.Column(
-        db.DateTime,
+        db.String(10),
         nullable=False,
-        default=datetime.utcnow
     )
     email = db.Column(
         db.String(100),
@@ -66,3 +65,15 @@ class User(db.Model):
         db.String(100),
         nullable=True
     )
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update_info(self, new_info):
+        User.query.filter_by(cpf=self.cpf).update(new_info)
+        db.session.commit()
+
+    @classmethod
+    def find_by_cpf(cls, cpf):
+        return cls.query.filter_by(cpf=cpf).first()

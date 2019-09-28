@@ -1,9 +1,16 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 
-parser = reqparse.RequestParser()
-parser.add_argument('email', help = 'This field cannot be blank', required = True)
-parser.add_argument('password', help = 'This field cannot be blank', required = True)
+from rsi_app.potiapi.models import User as UserModel
+
+registration_parser = reqparse.RequestParser()
+register_required_fields = (
+    'email', 'password', 'name', 'surname', 'birth_date', 'cpf'
+)
+for field in register_required_fields:
+    registration_parser.add_argument(
+        field, help='This field cannot be blank', required=True
+    )
 
 DOC_URL = 'github.com/tyronedamasceno/desafio-rsi-10k/blob/master/docs.md'
 
@@ -16,11 +23,23 @@ class HomeResource(Resource):
 
 class UserRegistration(Resource):
     def post(self):
-        data = parser.parse_args()
-        return data
+        data = registration_parser.parse_args()
+        if UserModel.find_by_cpf(data['cpf']):
+            return {'message': 'An user with this CPF already exists'}, 400
+        new_user = UserModel(**data)
+        try:
+            new_user.save_to_db()
+        except:
+            return {'message': 'Something went wrong'}, 400
+        return {'message': 'User successfully created'}, 201
 
     def put(self):
-        return {'tem put': 'nesse role'}
+        data = registration_parser.parse_args()
+        existent_user = UserModel.find_by_cpf(data['cpf'])
+        if not existent_user:
+            return {'message': 'Dont exists an user with this CPF'}, 400
+        existent_user.update_info(data)
+        return {'message': 'User successfully updated'}, 200
 
 
 class User(Resource):
