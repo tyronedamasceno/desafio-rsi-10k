@@ -91,7 +91,8 @@ class UserLogin(Resource):
 
 class UserLogout(Resource):
     def get(self):
-        return {}
+        # Logout user...
+        return {'message': 'User successfully logged out'}
 
 
 class Transfer(Resource):
