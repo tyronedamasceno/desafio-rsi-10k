@@ -37,17 +37,36 @@ class UserRegistration(Resource):
         data = registration_parser.parse_args()
         existent_user = UserModel.find_by_cpf(data['cpf'])
         if not existent_user:
-            return {'message': 'Dont exists an user with this CPF'}, 400
+            return {'message': 'Dont exists an user with this CPF'}, 404
         existent_user.update_info(data)
         return {'message': 'User successfully updated'}, 200
 
 
 class User(Resource):
     def get(self, cpf):
-        return {'isso': 'foi um get'}
+        if isinstance(cpf, (str, bytes)):
+            try:
+                cpf = int(cpf.replace('.', '').replace('-', ''))
+            except ValueError:
+                return {'message': 'Invalid CPF'}, 400
+        
+        user = UserModel.find_by_cpf(cpf)
+        if not user:
+            return {'message': 'Dont exists an user with this CPF'}, 404
+        return user.to_dict(), 200
 
     def delete(self, cpf):
-        return {'naaaao': 'pq me deletas?'}
+        if isinstance(cpf, (str, bytes)):
+            try:
+                cpf = int(cpf.replace('.', '').replace('-', ''))
+            except ValueError:
+                return {'message': 'Invalid CPF'}, 400
+
+        user = UserModel.find_by_cpf(cpf)
+        if not user:
+            return {'message': 'Dont exists an user with this CPF'}, 404
+        user.delete_user()
+        return {'message': 'User successfully deleted'}, 204
 
 
 class UserLogin(Resource):

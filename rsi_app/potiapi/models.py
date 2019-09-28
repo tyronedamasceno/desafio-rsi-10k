@@ -74,6 +74,24 @@ class User(db.Model):
         User.query.filter_by(cpf=self.cpf).update(new_info)
         db.session.commit()
 
+    def delete_user(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def to_dict(self):
+        return dict(
+            cpf=self.cpf,
+            name=self.name,
+            surname=self.surname,
+            birth_date=self.birth_date,
+            email=self.email,
+            street=self.street,
+            number=self.number,
+            neighborhood=self.neighborhood,
+            city=self.city,
+            state=self.state,
+        )
+
     @classmethod
     def find_by_cpf(cls, cpf):
         return cls.query.filter_by(cpf=cpf).first()
