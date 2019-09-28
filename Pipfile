@@ -7,6 +7,10 @@ verify_ssl = true
 [packages]
 
 Flask = "*"
+flask-restful = "*"
+flask-sqlalchemy = "*"
+passlib = "*"
+flask-cors = "*"
 
 [requires]
 
