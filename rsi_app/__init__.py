@@ -13,6 +13,7 @@ db = SQLAlchemy(app)
 
 from rsi_app.potiapi import resources
 
+db.drop_all()
 db.create_all()
 
 api.add_resource(resources.HomeResource, '/')

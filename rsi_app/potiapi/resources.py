@@ -1,16 +1,11 @@
 from flask import jsonify
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 
-from rsi_app.potiapi.models import User as UserModel
-
-registration_parser = reqparse.RequestParser()
-register_required_fields = (
-    'email', 'password', 'name', 'surname', 'birth_date', 'cpf'
+from rsi_app.potiapi.models import User as UserModel, Account as AccountModel
+from rsi_app.potiapi.request_parsers import (
+    account_registration_parser, user_registration_parser,
+    account_deposit_parser
 )
-for field in register_required_fields:
-    registration_parser.add_argument(
-        field, help='This field cannot be blank', required=True
-    )
 
 DOC_URL = 'github.com/tyronedamasceno/desafio-rsi-10k/blob/master/docs.md'
 
@@ -23,7 +18,7 @@ class HomeResource(Resource):
 
 class UserRegistration(Resource):
     def post(self):
-        data = registration_parser.parse_args()
+        data = user_registration_parser.parse_args()
         if UserModel.find_by_cpf(data['cpf']):
             return {'message': 'An user with this CPF already exists'}, 400
         new_user = UserModel(**data)
@@ -34,7 +29,7 @@ class UserRegistration(Resource):
         return {'message': 'User successfully created'}, 201
 
     def put(self):
-        data = registration_parser.parse_args()
+        data = user_registration_parser.parse_args()
         existent_user = UserModel.find_by_cpf(data['cpf'])
         if not existent_user:
             return {'message': 'Dont exists an user with this CPF'}, 404
@@ -97,17 +92,50 @@ class Extract(Resource):
 
 class AccountRegistration(Resource):
     def post(self):
-        return {'tamo': 'aqui'}
+        data = account_registration_parser.parse_args()
+
+        if AccountModel.find_by_id(data['id']):
+            return {'message': 'An account with this ID already exists'}, 400
+        if not UserModel.find_by_cpf(data['cpf']):
+            return {'message': 'This CPF does not belong to a registered user'}, 400
+        new_account = AccountModel(**data)
+        try:
+            new_account.save_to_db()
+        except:
+            return {'message': 'Something went wrong'}, 400
+        return {'message': 'Account successfully created'}, 201
 
 
 class Account(Resource):
     def get(self, id):
-        return {'isso': 'foi um get'}
+        account = AccountModel.find_by_id(id)
+        if not account:
+            return {'message': 'Dont exists an account with this ID'}, 404
+        return account.to_dict(), 200
 
     def delete(self, id):
-        return {'naaaao': 'pq me deletas?'}
+        account = UserModel.find_by_id(id)
+        if not account:
+            return {'message': 'Dont exists an account with this ID'}, 404
+        account.delete_account()
+        return {'message': 'Account successfully deleted'}, 204
 
 
 class AccountDeposit(Resource):
-    def post(self, valor):
-        return {'oia': 'a grana entrando'}
+    def post(self):
+        data = account_deposit_parser.parse_args()
+        account = AccountModel.find_by_id(data['conta'])
+        if not account:
+            return {'message': 'Dont exists an account with this ID'}, 404
+        if isinstance(data['valor'], (str, bytes)):
+            try:
+                data['valor'] = float(data['valor'].replace(',', '.'))
+            except ValueError:
+                return {'message': 'Invalid deposit value'}, 400
+
+        if data['valor'] < 0:
+            return {'message': 'Invalid deposit value'}, 400
+
+        account.update_balance(data['valor'])
+        # create_transaction(conta, valor, now)
+        return {'message': 'Deposit successfully'}

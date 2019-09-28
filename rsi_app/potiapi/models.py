@@ -65,6 +65,11 @@ class User(db.Model):
         db.String(100),
         nullable=True
     )
+    accounts = db.relationship(
+        'Account',
+        backref='user',
+        lazy=True
+    )
 
     def save_to_db(self):
         db.session.add(self)
@@ -81,17 +86,55 @@ class User(db.Model):
     def to_dict(self):
         return dict(
             cpf=self.cpf,
-            name=self.name,
-            surname=self.surname,
-            birth_date=self.birth_date,
+            nome=self.name,
+            sobrenome=self.surname,
+            dataNascimento=self.birth_date,
             email=self.email,
-            street=self.street,
-            number=self.number,
-            neighborhood=self.neighborhood,
-            city=self.city,
-            state=self.state,
+            rua=self.street,
+            numero=self.number,
+            bairro=self.neighborhood,
+            natal=self.city,
+            estado=self.state,
         )
 
     @classmethod
     def find_by_cpf(cls, cpf):
         return cls.query.filter_by(cpf=cpf).first()
+
+
+class Account(db.Model):
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+    balance = db.Column(
+        db.Float,
+        default=0.0
+    )
+    cpf = db.Column(
+        db.Integer,
+        db.ForeignKey('user.cpf'),
+        nullable=False
+    )
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def to_dict(self):
+        return dict(
+            conta=self.id,
+            saldo=self.balance
+        )
+
+    def delete_account(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def update_balance(self, value):
+        self.balance += value
+        db.session.commit()
+
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
