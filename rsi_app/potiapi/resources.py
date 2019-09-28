@@ -8,7 +8,7 @@ from rsi_app.potiapi.models import (
 )
 from rsi_app.potiapi.request_parsers import (
     account_registration_parser, user_registration_parser,
-    account_deposit_parser
+    account_deposit_parser, extract_insertion_parser
 )
 from rsi_app.potiapi.utils import create_transaction    
 
@@ -100,8 +100,32 @@ class Extract(Resource):
         account = AccountModel.find_by_id(id_conta)
         if not account:
             return {'message': 'Dont exists an account with this ID'}, 404
+        account.reset_balance()
         ExtractModel.delete_all(id_conta)
         return {'message': 'Extracts successfully deleted'}, 204
+
+
+class ExtractInsertion(Resource):
+    def post(self):
+        data = extract_insertion_parser.parse_args()
+        account = AccountModel.find_by_id(data['conta'])
+        if not account:
+            return {'message': 'An account with this ID already exists'}, 400
+
+        if isinstance(data['valor'], (str, bytes)):
+            try:
+                data['valor'] = float(data['valor'].replace(',', '.'))
+            except ValueError:
+                return {'message': 'Invalid deposit value'}, 400
+
+        account.update_balance(data['valor'])
+        create_transaction(
+            date=datetime.strptime(data['data'], '%Y-%m-%d'),
+            account=data['conta'], value=data['valor'],
+            description=data.get('descricao')
+        )
+
+        return {'message': 'Extract successfully added'}
 
 
 class AccountRegistration(Resource):

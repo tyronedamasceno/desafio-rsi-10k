@@ -135,6 +135,10 @@ class Account(db.Model):
         self.balance += value
         db.session.commit()
 
+    def reset_balance(self, value):
+        self.balance = 0
+        db.session.commit()
+
     @classmethod
     def find_by_id(cls, id):
         return cls.query.filter_by(id=id).first()
