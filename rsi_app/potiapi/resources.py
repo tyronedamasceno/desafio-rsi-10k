@@ -26,7 +26,14 @@ class UserRegistration(Resource):
         data = user_registration_parser.parse_args()
         if UserModel.find_by_cpf(data['cpf']):
             return {'message': 'An user with this CPF already exists'}, 400
-        new_user = UserModel(**data)
+        new_user = UserModel(
+            name=data['nome'], surname=data['sobrenome'], cpf=data['cpf'],
+            birth_date=data['dataNascimento'], email=data['email'],
+            password=UserModel.generate_hash(data['password']),
+            street=data.get('rua'), number=data.get('numero'),
+            neighborhood=data.get('bairro'), city=data.get('cidade'),
+            state=data.get('state')
+        )
         try:
             new_user.save_to_db()
         except:

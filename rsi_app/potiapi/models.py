@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from passlib.hash import pbkdf2_sha256 as sha256
+
 from rsi_app import db
 
 
@@ -96,6 +98,14 @@ class User(db.Model):
             natal=self.city,
             estado=self.state,
         )
+
+    @staticmethod
+    def generate_hash(password):
+        return sha256.hash(password)
+
+    @staticmethod
+    def verify_hash(password, hash):
+        return sha256.verify(password, hash)
 
     @classmethod
     def find_by_cpf(cls, cpf):
