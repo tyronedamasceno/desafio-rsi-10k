@@ -97,7 +97,11 @@ class Extract(Resource):
         }
 
     def delete(self, id_conta):
-        return {'naaaao': 'pq me deletas?'}     
+        account = AccountModel.find_by_id(id_conta)
+        if not account:
+            return {'message': 'Dont exists an account with this ID'}, 404
+        ExtractModel.delete_all(id_conta)
+        return {'message': 'Extracts successfully deleted'}, 204
 
 
 class AccountRegistration(Resource):

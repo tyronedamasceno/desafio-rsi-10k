@@ -172,3 +172,8 @@ class Extract(db.Model):
             descricao=self.description,
             valor=self.value
         )
+
+    @classmethod
+    def delete_all(cls, id_conta):
+        db.session.query(cls).filter_by(account=id_conta).delete()
+        db.session.commit()
