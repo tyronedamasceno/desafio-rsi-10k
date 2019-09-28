@@ -13,7 +13,7 @@ from rsi_app.potiapi.request_parsers import (
 )
 from rsi_app.potiapi.utils import create_transaction    
 
-DOC_URL = 'github.com/tyronedamasceno/desafio-rsi-10k/blob/master/docs.md'
+DOC_URL = 'http://rsi-hackaton.us-east-1.elasticbeanstalk.com/swagger-ui.html'
 
 
 class HomeResource(Resource):
